@@ -17,7 +17,7 @@ def send_message(chat_id, text):
 
 def main():
     last_seen = time.time()
-    heartbeat_timeout = 10  # segundos
+    heartbeat_timeout = 60  # segundos
 
     print("Bot escuchando heartbeat...")
 
