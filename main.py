@@ -36,9 +36,17 @@ def main():
             offset = upd['update_id'] + 1
             msg = upd.get('message', {})
             chat_id = str(msg.get('chat', {}).get('id', ''))
+            texto = msg.get('text', '')
             if chat_id == CHAT_ID_GROUP:
                 last_seen = time.time()
                 print("Recibido mensaje en el grupo, timer reseteado")
+                # Si detecta "ERROR 500" (puedes adaptarlo al texto exacto que envíe el servidor)
+                if texto and "ERROR 500" in texto:
+                    send_message(
+                        CHAT_ID_PRIVADO,
+                        f"⚠️ Detectado mensaje de ERROR 500 en el grupo: \"{texto}\""
+                    )
+                    print("Notificación privada enviada por error 500.")
         if time.time() - last_seen > heartbeat_timeout:
             send_message(
                 CHAT_ID_PRIVADO,
