@@ -3,7 +3,8 @@ import requests
 
 TOKEN = "8069070333:AAFCY5U2N2z6xKCIt8nC2Tmv2yP2Afc44uk"
 CHAT_ID_GROUP = "-4986505595"
-CHAT_ID_PRIVADO = "347020516"
+CHAT_ID_PRIVADO_1 = "347020516"
+CHAT_ID_PRIVADO_2 = "1718805531"  # Nuevo chat_id
 
 def send_message(chat_id, text):
     try:
@@ -40,19 +41,17 @@ def main():
             if chat_id == CHAT_ID_GROUP:
                 last_seen = time.time()
                 print("Recibido mensaje en el grupo, timer reseteado")
-                # Si detecta "ERROR 500" (puedes adaptarlo al texto exacto que envíe el servidor)
+                # Si detecta "ERROR 500"
                 if texto and "ERROR 500" in texto:
-                    send_message(
-                        CHAT_ID_PRIVADO,
-                        f"⚠️ Detectado mensaje de ERROR 500 en el grupo: \"{texto}\""
-                    )
-                    print("Notificación privada enviada por error 500.")
+                    mensaje_error = f"⚠️ Detectado mensaje de ERROR 500 en el grupo: \"{texto}\""
+                    send_message(CHAT_ID_PRIVADO_1, mensaje_error)
+                    send_message(CHAT_ID_PRIVADO_2, mensaje_error)
+                    print("Notificación privada enviada por error 500 a ambos usuarios.")
         if time.time() - last_seen > heartbeat_timeout:
-            send_message(
-                CHAT_ID_PRIVADO,
-                "¡Alerta! No se recibió ningún mensaje en el grupo en los últimos 10 segundos."
-            )
-            print("Alerta enviada por inactividad.")
+            alerta = "¡Alerta! No se recibió ningún mensaje en el grupo en los últimos 10 segundos."
+            send_message(CHAT_ID_PRIVADO_1, alerta)
+            send_message(CHAT_ID_PRIVADO_2, alerta)
+            print("Alerta enviada por inactividad a ambos usuarios.")
             last_seen = time.time()
         time.sleep(2)
 
