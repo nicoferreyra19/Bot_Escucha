@@ -6,6 +6,7 @@ CHAT_ID_GROUP = "-4986505595"
 CHAT_ID_PRIVADO_1 = "347020516"
 CHAT_ID_PRIVADO_2 = "1718805531"  # Nuevo chat_id
 
+
 def send_message(chat_id, text):
     try:
         requests.post(
@@ -15,17 +16,37 @@ def send_message(chat_id, text):
     except Exception as e:
         print(f"Error enviando mensaje: {e}")
 
+
 def get_updates(offset=None):
     url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
-    params = {'timeout': 60}
+    params = {"timeout": 60}
     if offset:
-        params['offset'] = offset
+        params["offset"] = offset
     res = requests.get(url, params=params)
     if res.status_code == 200:
-        return res.json().get('result', [])
+        return res.json().get("result", [])
     return []
 
+
+def test_conexion():
+    # Test rápido para ver si el contenedor tiene salida a Internet
+    urls = [
+        "https://google.com",
+        "https://api.telegram.org"
+    ]
+    for url in urls:
+        print(f"Probando {url} ...")
+        try:
+            r = requests.get(url, timeout=10)
+            print(f"{url} -> status {r.status_code}")
+        except Exception as e:
+            print(f"{url} ERROR: {e}")
+
+
 def main():
+    # Lanza una vez el test de red al iniciar
+    test_conexion()
+
     last_seen = time.time()
     heartbeat_timeout = 10  # segundos (ajustable)
     offset = None
@@ -34,16 +55,16 @@ def main():
     while True:
         updates = get_updates(offset)
         for upd in updates:
-            offset = upd['update_id'] + 1
-            msg = upd.get('message', {})
-            chat_id = str(msg.get('chat', {}).get('id', ''))
-            texto = msg.get('text', '')
+            offset = upd["update_id"] + 1
+            msg = upd.get("message", {})
+            chat_id = str(msg.get("chat", {}).get("id", ""))
+            texto = msg.get("text", "")
             if chat_id == CHAT_ID_GROUP:
                 last_seen = time.time()
                 print("Recibido mensaje en el grupo, timer reseteado")
                 # Si detecta "ERROR 500"
                 if texto and "ERROR 500" in texto:
-                    mensaje_error = f"⚠️ Detectado mensaje de ERROR 500 en el grupo: \"{texto}\""
+                    mensaje_error = f'⚠️ Detectado mensaje de ERROR 500 en el grupo: "{texto}"'
                     send_message(CHAT_ID_PRIVADO_1, mensaje_error)
                     send_message(CHAT_ID_PRIVADO_2, mensaje_error)
                     print("Notificación privada enviada por error 500 a ambos usuarios.")
@@ -54,6 +75,7 @@ def main():
             print("Alerta enviada por inactividad a ambos usuarios.")
             last_seen = time.time()
         time.sleep(2)
+
 
 if __name__ == "__main__":
     main()
